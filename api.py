@@ -1,19 +1,23 @@
-from fastapi import FastAPI, Request, HTTPException
-import csv
+from flask import Flask, request, jsonify
 
-app = FastAPI()
+app = Flask(__name__)
 
-API_KEY = "your-secret-api-key"
+# Define your API key
+API_KEY = 'mysecretapikey123'
 
-@app.middleware("http")
-async def check_api_key(request: Request, call_next):
-    if request.headers.get("x-api-key") != API_KEY:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    return await call_next(request)
+# Sample route with GET method and API key check
+@app.route('/get-user', methods=['GET'])
+def get_user():
+    key = request.args.get('api_key')
 
-@app.get("/data")
-def read_csv():
-    with open("data.csv", newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        data = [row for row in reader]
-    return {"data": data}
+    if key != API_KEY:
+        return jsonify({'error': 'Unauthorized access'}), 401
+
+    data = {
+        'name': 'Nouman Aziz',
+        'email': 'nouman@example.com'
+    }
+    return jsonify(data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
